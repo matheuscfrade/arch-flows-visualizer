@@ -1,0 +1,164 @@
+{
+  "title": "ToDesktop — Architecture & Flows",
+  "subtitle": "Every package and external service that powers ToDesktop Builder and ToDesktop for Electron. Pick a flow on the right to highlight the path through the system and see what gets passed at each step.",
+  "legend": [
+    {"label": "Actor", "color": "bg-pink-500", "type": "actor"},
+    {"label": "Client surface", "color": "bg-blue-500", "type": "client"},
+    {"label": "Firebase Function codebase", "color": "bg-purple-500", "type": "firebase-fn"},
+    {"label": "Firebase data", "color": "bg-yellow-400", "type": "firebase-data"},
+    {"label": "Build pipeline", "color": "bg-green-500", "type": "build-pipeline"},
+    {"label": "Distribution / Workers", "color": "bg-cyan-500", "type": "distribution"},
+    {"label": "External service", "color": "bg-orange-500", "type": "external"}
+  ],
+  "columns": [
+    {
+      "name": "ACTORS",
+      "items": [
+        {"id": "end-user", "label": "End user", "sublabel": "Installed app / browser", "type": "actor"},
+        {"id": "user-electron-repo", "label": "User Electron repo", "sublabel": "@todesktop/cli", "type": "actor"},
+        {"id": "builder-app", "label": "Builder app", "sublabel": "Svelte Electron UI", "type": "actor"},
+        {"id": "admin-browser", "label": "Admin browser", "sublabel": "react + Firebase dashboard", "type": "actor"},
+        {"id": "invitee-browser", "label": "Invitee browser", "type": "actor"},
+        {"id": "stripe-src", "label": "Stripe (event src)", "type": "actor"}
+      ]
+    },
+    {
+      "name": "CLIENT SURFACES",
+      "items": [
+        {"id": "todesktop-cli", "label": "@todesktop/cli", "type": "client"},
+        {"id": "builder-template", "label": "Builder template", "sublabel": "desktop app/desktopify", "type": "client"},
+        {"id": "web-app-frontend", "label": "web-app frontend", "sublabel": "react + Firebase dashboard", "type": "client"},
+        {"id": "website-combined", "label": "website-combined", "sublabel": "todesktop.com / Astro", "type": "client"}
+      ]
+    },
+    {
+      "name": "AUTH + FIREBASE FUNCTIONS",
+      "items": [
+        {"id": "firebase-auth", "label": "Firebase Auth", "sublabel": "Google / Github / OIDC", "type": "firebase-fn"},
+        {"id": "functions-auth", "label": "functions/auth", "sublabel": "20 fns - login / OIDC", "type": "firebase-fn"},
+        {"id": "functions-builds", "label": "functions/builds", "sublabel": "15 fns - prepare/kickOff/release", "type": "firebase-fn"},
+        {"id": "functions-billing", "label": "functions/billing", "sublabel": "6 fns - webhook - checkout", "type": "firebase-fn"},
+        {"id": "functions-infra", "label": "functions/infrastructure", "sublabel": "13 fns - certs - domains", "type": "firebase-fn"},
+        {"id": "functions-api", "label": "functions/api", "sublabel": "17 fns - signed URLs - uploads", "type": "firebase-fn"},
+        {"id": "functions-analysis", "label": "functions/analysis", "sublabel": "3 fns - stats + deps", "type": "firebase-fn"}
+      ]
+    },
+    {
+      "name": "STORAGE / DATA",
+      "items": [
+        {"id": "firestore", "label": "Firestore", "sublabel": "users - apps - builds - invites", "type": "firebase-data"},
+        {"id": "firebase-storage", "label": "Firebase Storage", "sublabel": "icons - artifacts - desktopify", "type": "firebase-data"},
+        {"id": "aws-s3", "label": "AWS S3", "sublabel": "source - artifacts - desktopify...", "type": "firebase-data"},
+        {"id": "cloudflare-r2", "label": "Cloudflare R2", "sublabel": "edge origin for downloads", "type": "firebase-data"}
+      ]
+    },
+    {
+      "name": "BUILD PIPELINE",
+      "items": [
+        {"id": "azure-pipelines", "label": "Azure Pipelines", "sublabel": "DevOps API - Mac/Linux/Windows", "type": "build-pipeline"},
+        {"id": "desktopify-runner", "label": "desktopify-runner", "sublabel": "Azure agent - bootstrap", "type": "build-pipeline"},
+        {"id": "todesktop-desktopify", "label": "@todesktop/desktopify", "sublabel": "build server - app-builder-lib", "type": "build-pipeline"}
+      ]
+    },
+    {
+      "name": "DISTRIBUTION / WORKERS",
+      "items": [
+        {"id": "monorepo-api-workers", "label": "monorepo / api workers", "sublabel": "REST - worker-lib - desktopify", "type": "distribution"},
+        {"id": "monorepo-api-worker2", "label": "monorepo / api worker", "sublabel": "REST - worker-lib - desktopify", "type": "distribution"},
+        {"id": "cloudflare-api", "label": "Cloudflare API", "sublabel": "custom hostnames - DoH - purge", "type": "distribution"},
+        {"id": "postmark", "label": "Postmark", "sublabel": "transactional email", "type": "distribution"},
+        {"id": "stripe-api", "label": "Stripe API", "sublabel": "checkout - web - invoices", "type": "distribution"},
+        {"id": "npm-registry", "label": "npm registry", "type": "distribution"}
+      ]
+    },
+    {
+      "name": "EXTERNAL SERVICES",
+      "items": [
+        {"id": "azure-key-vault", "label": "Azure Key Vault", "sublabel": "signing certs - secrets", "type": "external"},
+        {"id": "apple-notarization", "label": "Apple notarization", "sublabel": "notary - stapler", "type": "external"},
+        {"id": "windows-code-signing", "label": "Windows code-signing CA", "sublabel": "EV / OV cert authority", "type": "external"}
+      ]
+    }
+  ],
+  "connections": [
+    {"number": 1, "from": "builder-app", "to": "builder-template"},
+    {"number": 2, "from": "functions-builds", "to": "firestore"},
+    {"number": 3, "from": "functions-builds", "to": "firestore"},
+    {"number": 4, "from": "firestore", "to": "azure-pipelines"},
+    {"number": 5, "from": "azure-pipelines", "to": "desktopify-runner"},
+    {"number": 6, "from": "aws-s3", "to": "desktopify-runner"},
+    {"number": 7, "from": "functions-builds", "to": "aws-s3"},
+    {"number": 8, "from": "desktopify-runner", "to": "todesktop-desktopify"},
+    {"number": 9, "from": "todesktop-desktopify", "to": "monorepo-api-workers"},
+    {"number": 10, "from": "monorepo-api-workers", "to": "windows-code-signing"},
+    {"number": 11, "from": "aws-s3", "to": "todesktop-desktopify"},
+    {"number": 12, "from": "firestore", "to": "azure-pipelines"}
+  ],
+  "flows": [
+    {
+      "id": "todesktop-build",
+      "name": "todesktop build (Electron CLI)",
+      "description": "Developer runs 'todesktop build' in their Electron repo",
+      "path": [1, 7, 11]
+    },
+    {
+      "id": "todesktop-release",
+      "name": "todesktop release (publish as latest)",
+      "description": "Developer marks a successful build as the new 'latest' for end users",
+      "path": [1, 2, 3, 4, 5]
+    },
+    {
+      "id": "builder-release-button",
+      "name": "Builder “Release” button",
+      "description": "User clicks Release inside the Builder Electron app",
+      "path": [1, 2, 3, 4, 5, 8, 9, 10]
+    },
+    {
+      "id": "installed-app-auto-update",
+      "name": "Installed app auto-update check",
+      "description": "End user launches an installed ToDesktop app",
+      "path": [6, 11, 8]
+    },
+    {
+      "id": "invite-new-user",
+      "name": "Invite a new user to an organization",
+      "description": "Org admin opens InviteUserForm in the dashboard",
+      "path": [3]
+    },
+    {
+      "id": "new-user-signup",
+      "name": "New user signup (dashboard + CLI login)",
+      "description": "New user lands on app.todesktop.com or runs 'todesktop login'",
+      "path": [1]
+    },
+    {
+      "id": "stripe-billing-webhook",
+      "name": "Stripe billing webhook",
+      "description": "Stripe POSTs a subscription.* event to the billing webhook",
+      "path": [7]
+    },
+    {
+      "id": "custom-download-domain",
+      "name": "Custom download domain setup",
+      "description": "Admin adds a custom domain (e.g. download.theirsite.com) in the dashboard",
+      "path": [12]
+    }
+  ],
+  "steps": [
+    {
+      "number": 1,
+      "title": "Builder app → Firestore",
+      "description": "save app config\ndesktop app/app — Svelte UI writes window/menu/branding/icons to the app doc."
+    },
+    {
+      "number": 2,
+      "title": "Builder app → functions/builds",
+      "description": "kickOffBuild()\ncreateBuildForBuilderRunner — Builder-specific entry that synthesizes JSON_BUILD_DATA from the app doc (no user-authored todesktop.json)."
+    },
+    {
+      "number": 3,
+      "title": "functions/builds → Firestore",
+      "description": "Same builds collection used by the CLI flow."
+    }
+  ]
+}
