@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Architecture Flows Visualization Data",
+  "description": "Data structure for generating interactive architecture & flows HTML diagrams",
+  "type": "object",
+  "required": ["title", "columns", "flows", "steps"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Main title of the diagram, e.g. 'ToDesktop — Architecture & Flows'"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Optional subtitle or description"
+    },
+    "legend": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {"type": "string"},
+          "color": {"type": "string", "description": "Tailwind or hex color class, e.g. 'bg-yellow-400' or '#fbbf24'"},
+          "type": {"type": "string", "description": "Internal type key for matching"}
+        },
+        "required": ["label", "color", "type"]
+      }
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Column header, e.g. 'ACTORS'"},
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "description": "Unique identifier, e.g. 'builder-app'"},
+                "label": {"type": "string"},
+                "sublabel": {"type": "string", "description": "Optional secondary text like tech stack"},
+                "type": {"type": "string", "description": "Matches legend type for color"}
+              },
+              "required": ["id", "label", "type"]
+            }
+          }
+        },
+        "required": ["name", "items"]
+      }
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {"type": "integer", "description": "The number label shown on the connection line"},
+          "from": {"type": "string", "description": "ID of source item"},
+          "to": {"type": "string", "description": "ID of target item"},
+          "label": {"type": "string", "description": "Optional short label for the connection"}
+        },
+        "required": ["number", "from", "to"]
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string", "description": "Display name of the flow, e.g. 'Builder “Release” button'"},
+          "description": {"type": "string"},
+          "path": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "description": "Ordered list of connection numbers that form this flow's path"
+          }
+        },
+        "required": ["id", "name", "description", "path"]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {"type": "integer"},
+          "title": {"type": "string"},
+          "description": {"type": "string", "description": "Detailed multi-line explanation of the step"}
+        },
+        "required": ["number", "title", "description"]
+      }
+    }
+  }
+}
